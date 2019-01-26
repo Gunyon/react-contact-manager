@@ -10,6 +10,9 @@ export class Contacts extends Component {
           const { contacts } = value;
           return (
             <Fragment>
+              <h1 className="display-4 mb-2">
+                <span className="text-danger">Contact</span> list
+              </h1>
               {contacts.map(contact => {
                 return <Contact key={contact.id} contact={contact} />;
               })}

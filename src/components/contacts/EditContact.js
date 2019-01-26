@@ -3,13 +3,23 @@ import { Consumer } from '../../context';
 import TextInputGroup from './../layout/TextInputGroup';
 import { fetch } from 'whatwg-fetch';
 
-export class AddContact extends Component {
+export class EditContact extends Component {
   state = {
     name: '',
     email: '',
     phone: '',
     errors: {}
   };
+
+  async componentDidMount() {
+    const { id } = this.props.match.params;
+    const resp = await fetch(
+      `https://jsonplaceholder.typicode.com/users/${id}`
+    );
+    const contact = await resp.json();
+    const { name, email, phone } = contact;
+    this.setState({ name, email, phone });
+  }
 
   handleFormControls = e => {
     const { name, value } = e.target;
@@ -35,18 +45,25 @@ export class AddContact extends Component {
       return;
     }
 
-    const resp = await fetch('https://jsonplaceholder.typicode.com/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name, email, phone })
-    });
+    const { id } = this.props.match.params;
+
+    const resp = await fetch(
+      `https://jsonplaceholder.typicode.com/users/${id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, phone })
+      }
+    );
 
     const data = await resp.json();
 
+    console.log(data);
+
     dispatch({
-      type: 'ADD_CONTACT',
+      type: 'UPDATE_CONTACT',
       payload: data
     });
 
@@ -63,7 +80,7 @@ export class AddContact extends Component {
           const { dispatch } = value;
           return (
             <div className="card mb-3">
-              <div className="card-header">Add contact</div>
+              <div className="card-header">Edit contact</div>
               <div className="card-body">
                 <form onSubmit={this.onSubmit.bind(this, dispatch)}>
                   <TextInputGroup
@@ -93,7 +110,7 @@ export class AddContact extends Component {
                   />
                   <input
                     type="submit"
-                    value="Add contact"
+                    value="Update contact"
                     className="btn btn-block btn-light"
                   />
                 </form>
@@ -106,4 +123,4 @@ export class AddContact extends Component {
   }
 }
 
-export default AddContact;
+export default EditContact;

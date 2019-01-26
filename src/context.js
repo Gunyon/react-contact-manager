@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import 'whatwg-fetch';
 
 const {
   Provider: ContactsProvider,
@@ -6,18 +7,25 @@ const {
 } = React.createContext();
 
 const reducer = (state, action) => {
-  switch (action.type) {
+  const { type, payload } = action;
+
+  switch (type) {
     case 'DELETE_CONTACT':
       return {
         ...state,
         contacts: state.contacts.filter(contact => {
-          return contact.id !== action.payload;
+          return contact.id !== payload;
         })
       };
     case 'ADD_CONTACT':
       return {
         ...state,
-        contacts: [action.payload, ...state.contacts]
+        contacts: [payload, ...state.contacts]
+      };
+    case 'UPDATE_CONTACT':
+      return {
+        ...state,
+        contacts: state.contacts.map(c => (c.id === payload.id ? payload : c))
       };
     default:
       return state;
@@ -26,30 +34,17 @@ const reducer = (state, action) => {
 
 export class Provider extends Component {
   state = {
-    contacts: [
-      {
-        id: 1,
-        name: 'John Doe',
-        email: 'jdoe@gmail.com',
-        phone: '555-555-5555'
-      },
-      {
-        id: 2,
-        name: 'Karen Williams',
-        email: 'karen@gmail.com',
-        phone: '222-222-2222'
-      },
-      {
-        id: 3,
-        name: 'Henry Johnson',
-        email: 'henry@gmail.com',
-        phone: '111-111-1111'
-      }
-    ],
+    contacts: [],
     dispatch: action => {
       this.setState(state => reducer(state, action));
     }
   };
+
+  async componentDidMount() {
+    const resp = await fetch('https://jsonplaceholder.typicode.com/users');
+    const data = await resp.json();
+    this.setState({ contacts: data });
+  }
 
   render() {
     return (

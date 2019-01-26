@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Consumer } from '../../context';
+import { fetch } from 'whatwg-fetch';
+import { Link } from 'react-router-dom';
 
 export class Contact extends Component {
   static propTypes = {
@@ -23,8 +25,16 @@ export class Contact extends Component {
     });
   };
 
-  onDeleteClick = (id, dispatch) => {
-    dispatch({ type: 'DELETE_CONTACT', payload: id });
+  onDeleteClick = async (id, dispatch) => {
+    const resp = await fetch(
+      `https://jsonplaceholder.typicode.com/users/${id}`,
+      {
+        method: 'DELETE'
+      }
+    );
+    if (resp.status === 200) {
+      dispatch({ type: 'DELETE_CONTACT', payload: id });
+    }
   };
 
   render() {
@@ -47,7 +57,17 @@ export class Contact extends Component {
                   className="fas fa-times"
                   style={{ cursor: 'pointer', float: 'right', color: 'red' }}
                   onClick={this.onDeleteClick.bind(this, id, dispatch)}
-                />
+                />{' '}
+                <Link to={`contact/edit/${id}`}>
+                  <i
+                    className="fas fa-edit"
+                    style={{
+                      float: 'right',
+                      cursor: 'pointer',
+                      marginRight: '1rem'
+                    }}
+                  />
+                </Link>
               </h4>
               {showContactInfo ? (
                 <ul className="list-group">
